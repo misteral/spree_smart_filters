@@ -1,0 +1,1 @@
+require 'spree/product_filters'
