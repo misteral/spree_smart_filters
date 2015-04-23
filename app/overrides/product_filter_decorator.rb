@@ -68,7 +68,7 @@ module Spree
         values = Spree::OptionValue.in_taxon(taxon, option_type).order("position").map(&:name).compact.uniq
         {
           :name => option_type.presentation,
-          :scope => :selective_with,
+          :scope => :values_any,
           :labels => values.map { |k| [k, k] }
         }
       end

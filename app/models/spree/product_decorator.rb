@@ -1,5 +1,18 @@
 Spree::Product.class_eval do
 
+  add_search_scope :values_any do |*values|
+    values_id = Spree::OptionValue.where(name: values).pluck(:id)
+    return_product = []
+    Spree::Variant.includes(:option_values).each do |variant|
+      #this is magick!
+      variant_values_id = variant.option_values.map {|n| n.id}.sort
+      if (values_id - variant_values_id).empty?
+        return_product << variant.product.id
+      end
+    end
+    Spree::Product.where(id: return_product)
+  end
+
   add_search_scope :ascend_by_seller do
     joins(:seller).order("`spree_sellers`.name ASC")
   end
@@ -47,6 +60,11 @@ Spree::Product.class_eval do
     joins(:master => :default_price).where("#{price_table_name}.amount >= ?", price)
   end
 
+  # add_search_scope :valu_any do |*values|
+  #   [58,68].each_with_index do |value, index|
+  #     .joins("#{Spree::OptionValue.table_name} as v#{index} on v#{index}.variant_id = spree_variant.id").where("v#{index}.id = #{value}")
+  #   end
+  # end
 
   add_search_scope :selective_with do |*value|
     includes(variants_including_master: :option_values).
